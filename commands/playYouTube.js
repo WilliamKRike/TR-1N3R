@@ -2,6 +2,7 @@ const play = require('play-dl');
 const { createAudioPlayer, createAudioResource, joinVoiceChannel, NoSubscriberBehavior } = require('@discordjs/voice');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const queue = new Map();
+const skipTest = 0;
 // TypeScript: import ytdl from 'ytdl-core'; with --esModuleInterop
 // TypeScript: import * as ytdl from 'ytdl-core'; with --allowSyntheticDefaultImports
 // TypeScript: import ytdl = require('ytdl-core'); with neither of the above
@@ -30,13 +31,13 @@ module.exports = {
 			guildId : message.guild.id,
 			adapterCreator: message.guild.voiceAdapterCreator,
 		});
-		const player = createAudioPlayer({
-			behaviors: {
-				noSubscriber: NoSubscriberBehavior.Play,
-			},
-		});
 		// makeQueue
 		if (!serverQueue) {
+			const player = createAudioPlayer({
+				behaviors: {
+					noSubscriber: NoSubscriberBehavior.Play,
+				},
+			});
 			//	join vc to play it
 			connection.subscribe(player);
 
@@ -53,6 +54,7 @@ module.exports = {
 			queue_constructor.songs.push(args);
 			// console.log(queue_constructor.songs[0]);
 			video_player(message.guild.id, queue_constructor.songs[0], player, message);
+
 		}
 		else {
 			console.log('push song here');
@@ -75,18 +77,18 @@ module.exports = {
 		connection.on('stateChange', (oldState, newState) => {
 			console.log(`Connection transitioned from ${oldState.status} to ${newState.status}`);
 		});
-		player.on('stateChange', (oldState, newState) => {
-			console.log(`Audio player transitioned from ${oldState.status} to ${newState.status}`);
-		});
+		// player.on('stateChange', (oldState, newState) => {
+		// 	console.log(`Audio player transitioned from ${oldState.status} to ${newState.status}`);
+		// });
 
 	},
+	vars: skipTest,
 };
 
 const video_player = async (guild, args, player, message) => {
 	const song_queue = queue.get(message.guild.id);
 	console.log('queue info ** queue info');
 	console.log(song_queue);
-
 	// If no song is left in the server queue. Leave the voice channel and delete the key and value pair from the global queue.
 	if (!args) {
 	//	song_queue.voice_channel.leave();
@@ -119,3 +121,4 @@ const video_player = async (guild, args, player, message) => {
 	});*/
 	await message.channel.send(`🎶 Now playing **${resource.title}**`);
 };
+
